@@ -8,11 +8,13 @@ include_directories(src)
 include_directories(external/mongoose)
 
 file(COPY external/swagger-ui DESTINATION ./)
-#configure_file(resources/swagger/swagger.json ./swagger.json COPYONLY)
+configure_file(resources/swagger/swagger.json ./swagger.json COPYONLY)
 
 link_directories(/usr/lib /usr/lib/x86_64-linux-gnu)
 
 add_executable(BanService main.c
+        external/mongoose/mongoose.c
+        external/mongoose/mongoose.h
         src/server/db/driver/postgres/postgres_database.c
         src/server/db/driver/postgres/postgres_database.h
         src/server/domain/ban/ban.c
@@ -33,6 +35,8 @@ add_executable(BanService main.c
         src/server/service/ban_service.c
         src/server/service/ban_service.h
         src/utils.c
+        src/server/controller/ban/ban_controller.c
+        src/server/controller/ban/ban_controller.h
 )
 
 target_link_libraries(BanService -lpq -lcjson)

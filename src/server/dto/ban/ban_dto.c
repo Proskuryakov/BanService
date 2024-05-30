@@ -99,3 +99,28 @@ void free_ban_dto_array(BanDTO **bans) {
         free(bans);
     }
 }
+
+char *ban_dto_to_json_str(const BanDTO *ban) {
+    cJSON *json = ban_dto_to_json(ban);
+    char *json_str = cJSON_PrintUnformatted(json);
+    cJSON_Delete(json);
+    return json_str;
+}
+
+char *ban_dto_array_to_json_str(BanDTO **bans) {
+    cJSON *json = ban_dto_array_to_json(bans);
+    char *json_str = cJSON_PrintUnformatted(json);
+    cJSON_Delete(json);
+    return json_str;
+}
+
+BanDTO *json_str_to_ban_dto(const char *str) {
+    cJSON *json = cJSON_Parse(str);
+    BanDTO *dto = json_to_ban_dto(json);
+    cJSON_Delete(json);
+    return dto;
+}
+
+BanDTO **json_tr_to_ban_dto_array(const char *str) {
+    return NULL;
+}

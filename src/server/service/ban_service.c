@@ -71,7 +71,7 @@ static BanDTO **bans_to_dtos(Ban **bans) {
 }
 
 // Function to create a ban
-BanDTO *create_ban(const BanDTO *ban_dto) {
+BanDTO *ban_service_create_ban(const BanDTO *ban_dto) {
     Ban *ban_entity = ban_dto_to_entity(ban_dto);
     if (!ban_entity) return NULL;
 
@@ -91,7 +91,7 @@ BanDTO *create_ban(const BanDTO *ban_dto) {
 }
 
 // Function to get a ban by resource id, user id, and resource type
-BanDTO *get_ban(long long resource_id, long long user_id, const char *resource_type) {
+BanDTO *ban_service_get_ban(long long resource_id, long long user_id, const char *resource_type) {
     char *res_type = strdup(resource_type);
     BanPK pk = {resource_id, user_id, res_type};
     Ban *ban_entity = ban_repo_find(&pk);
@@ -105,7 +105,7 @@ BanDTO *get_ban(long long resource_id, long long user_id, const char *resource_t
 }
 
 // Function to update a ban
-BanDTO *update_ban(const BanDTO *ban_dto) {
+BanDTO *ban_service_update_ban(const BanDTO *ban_dto) {
     Ban *ban_entity = ban_dto_to_entity(ban_dto);
     if (!ban_entity) return NULL;
 
@@ -121,7 +121,7 @@ BanDTO *update_ban(const BanDTO *ban_dto) {
 }
 
 // Function to delete a ban by resource id, user id, and resource type
-void delete_ban(long long resource_id, long long user_id, const char *resource_type) {
+void ban_service_delete_ban(long long resource_id, long long user_id, const char *resource_type) {
     char *res_type = strdup(resource_type);
     BanPK pk = {resource_id, user_id, res_type};
     ban_repo_delete(&pk);
@@ -129,34 +129,42 @@ void delete_ban(long long resource_id, long long user_id, const char *resource_t
 }
 
 // Function to find all bans by user id
-BanDTO **find_all_bans_by_user_id(long long user_id) {
+BanDTO **ban_service_find_all_bans_by_user_id(long long user_id) {
     Ban **bans = ban_repo_find_all_by_user_id(user_id);
     return bans_to_dtos(bans);
 }
 
 // Function to find all bans by resource type and id
-BanDTO **find_all_bans_by_resource_type_and_id(const char *resource_type, long long resource_id) {
+BanDTO **ban_service_find_all_bans_by_resource_type_and_id(const char *resource_type, long long resource_id) {
     Ban **bans = ban_repo_find_all_by_resource_type_and_id(resource_type, resource_id);
     return bans_to_dtos(bans);
 }
 
 // Function to annul a ban by setting its expiration time to 1
-void annul_ban(long long resource_id, long user_id, const char *resource_type) {
-    BanDTO *ban_dto = get_ban(resource_id, user_id, resource_type);
+void ban_service_annul_ban(long long resource_id, long user_id, const char *resource_type) {
+    BanDTO *ban_dto = ban_service_get_ban(resource_id, user_id, resource_type);
     if (!ban_dto) return; // Ban does not exist
     ban_dto->expiration_date = 1;
-    UNUSED_PTR(update_ban(ban_dto))
+    UNUSED_PTR(ban_service_update_ban(ban_dto))
     free_ban_dto(ban_dto);
 }
 
-BanDTO **find_all_actual_bans_for_user_id(long long int user_id) {
+BanDTO **ban_service_find_all_actual_bans_for_user_id(long long int user_id) {
     long long timestamp = utils_time_in_milliseconds();
     Ban **bans = ban_repository_find_active_bans_by_user_id(user_id, timestamp);
     return bans_to_dtos(bans);
 }
 
-BanDTO **find_all_actual_bans_for_resource(const char *resource_type, long long int resource_id) {
+BanDTO **ban_service_find_all_actual_bans_for_resource(const char *resource_type, long long int resource_id) {
     long long timestamp = utils_time_in_milliseconds();
     Ban **bans = ban_repository_find_active_bans_by_resource_type_and_id(resource_type, resource_id, timestamp);
     return bans_to_dtos(bans);
+}
+
+void ban_service_start() {
+    ban_repo_init("postgresql://ban_service:banpasswd@localhost:5432/ban_db");
+}
+
+void ban_service_stop() {
+    ban_repo_close();
 }

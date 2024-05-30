@@ -1,0 +1,357 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "Ban Service API",
+    "version": "1.0.0",
+    "description": "API for managing bans."
+  },
+  "paths": {
+    "/v1/ban/resource/{resource_type}/id/{resource_id}/user/{user_id}": {
+      "get": {
+        "summary": "Get Ban by ID",
+        "operationId": "getBanById",
+        "parameters": [
+          {
+            "name": "resource_type",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "resource_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          {
+            "name": "user_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Ban found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Ban"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Ban not found"
+          }
+        }
+      },
+      "delete": {
+        "summary": "Delete Ban by ID",
+        "operationId": "deleteBanById",
+        "parameters": [
+          {
+            "name": "resource_type",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "resource_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          {
+            "name": "user_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "202": {
+            "description": "Ban deleted"
+          }
+        }
+      }
+    },
+    "/v1/ban/": {
+      "post": {
+        "summary": "Create Ban",
+        "operationId": "createBan",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BanDTO"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Ban created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Ban"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "summary": "Update Ban",
+        "operationId": "updateBan",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BanDTO"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Ban updated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Ban"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/ban/user/{user_id}/actual": {
+      "get": {
+        "summary": "Get Actual Bans by User ID",
+        "operationId": "getActualBansByUserId",
+        "parameters": [
+          {
+            "name": "user_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Actual bans for user",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/BanDTO"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/ban/resource/{resource_type}/id/{resource_id}/actual": {
+      "get": {
+        "summary": "Get Actual Bans by Resource",
+        "operationId": "getActualBansByResource",
+        "parameters": [
+          {
+            "name": "resource_type",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "resource_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Actual bans for resource",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/BanDTO"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/ban/resource/{resource_type}/id/{resource_id}/user/{user_id}/annul": {
+      "put": {
+        "summary": "Annul Ban",
+        "operationId": "annulBan",
+        "parameters": [
+          {
+            "name": "resource_type",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "resource_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          {
+            "name": "user_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Ban annulled"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "Ban": {
+        "type": "object",
+        "properties": {
+          "resource_id": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "user_id": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "resource_type": {
+            "type": "string"
+          },
+          "reason": {
+            "type": "string"
+          },
+          "moderator_id": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "created_at": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "updated_at": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "expiration_date": {
+            "type": "integer",
+            "format": "int64"
+          }
+        },
+        "required": [
+          "resource_id",
+          "user_id",
+          "resource_type",
+          "moderator_id",
+          "created_at",
+          "updated_at",
+          "expiration_date"
+        ]
+      },
+      "BanDTO": {
+        "type": "object",
+        "properties": {
+          "resource_id": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "user_id": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "resource_type": {
+            "type": "string"
+          },
+          "reason": {
+            "type": "string"
+          },
+          "moderator_id": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "created_at": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "updated_at": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "expiration_date": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "is_permanent": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "resource_id",
+          "user_id",
+          "resource_type",
+          "moderator_id",
+          "created_at",
+          "updated_at",
+          "expiration_date",
+          "is_permanent"
+        ]
+      }
+    }
+  }
+}

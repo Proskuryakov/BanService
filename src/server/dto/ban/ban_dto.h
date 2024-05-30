@@ -24,11 +24,15 @@ typedef struct {
 
 // Functions to convert between BanDTO and JSON
 cJSON *ban_dto_to_json(const BanDTO *ban);
+char *ban_dto_to_json_str(const BanDTO *ban);
 BanDTO *json_to_ban_dto(const cJSON *json);
+BanDTO *json_str_to_ban_dto(const char *str);
 
 // Functions to handle arrays of BanDTO
 cJSON *ban_dto_array_to_json(BanDTO **bans);
+char *ban_dto_array_to_json_str(BanDTO **bans);
 BanDTO **json_to_ban_dto_array(const cJSON *json);
+BanDTO **json_tr_to_ban_dto_array(const char *str);
 
 // Functions to free BanDTO and BanDTO arrays
 void free_ban_dto(BanDTO *ban);
