@@ -20,6 +20,7 @@ typedef struct {
 // Functions to convert between BanRequest and JSON
 cJSON *ban_request_to_json(const BanRequest *request);
 BanRequest *json_to_ban_request(const cJSON *json);
+BanRequest *json_str_to_ban_request(const char *str);
 
 // Functions to handle arrays of BanRequest
 cJSON *ban_request_array_to_json(BanRequest **requests);

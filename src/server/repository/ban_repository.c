@@ -33,8 +33,8 @@ Ban* ban_repo_create(const Ban *ban) {
     sprintf((char *) param_values[0], "%ld", ban->key.resource_id);
     param_values[1] = (char *) malloc(32); // Allocate memory for user_id
     sprintf((char *) param_values[1], "%ld", ban->key.user_id);
-    param_values[2] = ban->key.resource_type;
-    param_values[3] = ban->reason;
+    param_values[2] = strdup(ban->key.resource_type);
+    param_values[3] = strdup(ban->reason);
     param_values[4] = (char *) malloc(32); // Allocate memory for moderator_id
     sprintf((char *) param_values[4], "%ld", ban->moderator_id);
     param_values[5] = (char *) malloc(32); // Allocate memory for created_at
@@ -74,7 +74,7 @@ Ban* ban_repo_create(const Ban *ban) {
 Ban* ban_repo_update(const Ban *ban) {
     const char *sql = "UPDATE bans SET reason=$1, moderator_id=$2, created_at=$3, updated_at=$4, expiration_date=$5 WHERE resource_id=$6 AND user_id=$7 AND resource_type=$8";
     const char *param_values[8] = {NULL};
-    param_values[0] = ban->reason;
+    param_values[0] = strdup(ban->reason);
     param_values[1] = (char *) malloc(32); // Allocate memory for moderator_id
     sprintf((char *) param_values[1], "%ld", ban->moderator_id);
     param_values[2] = (char *) malloc(32); // Allocate memory for created_at
@@ -87,7 +87,7 @@ Ban* ban_repo_update(const Ban *ban) {
     sprintf((char *) param_values[5], "%ld", ban->key.resource_id);
     param_values[6] = (char *) malloc(32); // Allocate memory for user_id
     sprintf((char *) param_values[6], "%ld", ban->key.user_id);
-    param_values[7] = ban->key.resource_type;
+    param_values[7] = strdup(ban->key.resource_type);
 
     int err = db_execute_param(db_conn, sql, 8, param_values);
 
@@ -123,7 +123,7 @@ int ban_repo_delete(const BanPK *key) {
     sprintf((char *) param_values[0], "%ld", key->resource_id);
     param_values[1] = (char *) malloc(32); // Allocate memory for user_id
     sprintf((char *) param_values[1], "%ld", key->user_id);
-    param_values[2] = key->resource_type;
+    param_values[2] = strdup(key->resource_type);
 
     int result = db_execute_param(db_conn, sql, 3, param_values);
 
@@ -142,7 +142,7 @@ Ban *ban_repo_find(const BanPK *key) {
     sprintf((char *) param_values[0], "%ld", key->resource_id);
     param_values[1] = (char *) malloc(32); // Allocate memory for user_id
     sprintf((char *) param_values[1], "%ld", key->user_id);
-    param_values[2] = key->resource_type;
+    param_values[2] = strdup(key->resource_type);
 
     PGresult *res = db_query_param(db_conn, sql, 3, param_values);
 
@@ -237,12 +237,14 @@ Ban **ban_repo_find_all_by_resource_type_and_id(const char *resource_type, long 
 Ban **ban_repository_find_active_bans_by_user_id(long long user_id, long long time) {
     PGresult *res = NULL;
     const char *sql = "SELECT * FROM bans WHERE user_id = $1 AND (expiration_date > $2 OR expiration_date = 0)";
-    const char *param_values[2];
-    param_values[0] = (const char *)user_id;
-    param_values[1] = (const char *)time;
+    char *param_values[2] = {NULL};
+    param_values[0] = (char *) malloc(32);
+    param_values[1] = (char *) malloc(32);
+    sprintf(param_values[0], "%lld", user_id);
+    sprintf(param_values[1], "%lld", time);
 
     // Execute the query
-    res = db_query_param(db_conn, sql, 2, param_values);
+    res = db_query_param(db_conn, sql, 2, (const char **) param_values);
     if (!res) {
         fprintf(stderr, "Failed to execute query: %s\n", sql);
         return NULL;
@@ -293,13 +295,20 @@ Ban **ban_repository_find_active_bans_by_user_id(long long user_id, long long ti
 Ban **ban_repository_find_active_bans_by_resource_type_and_id(const char *resource_type, long long resource_id, long long time) {
     PGresult *res = NULL;
     const char *sql = "SELECT * FROM bans WHERE resource_type = $1 AND resource_id = $2 AND (expiration_date > $3 OR expiration_date = 0)";
-    const char *param_values[3];
-    param_values[0] = resource_type;
-    param_values[1] = (const char *)resource_id;
-    param_values[2] = (const char *)time;
+    char *param_values[3] = {NULL};
+    param_values[0] = strdup(resource_type);
+    param_values[1] = (char *) malloc(32);
+    param_values[2] = (char *) malloc(32);
+
+    sprintf(param_values[1], "%lld", resource_id);
+    sprintf(param_values[2], "%lld", time);
+
 
     // Execute the query
-    res = db_query_param(db_conn, sql, 3, param_values);
+    res = db_query_param(db_conn, sql, 3, (const char **) param_values);
+    for (int i = 0; i < 3; ++i) {
+        free(param_values[i]);
+    }
     if (!res) {
         fprintf(stderr, "Failed to execute query: %s\n", sql);
         return NULL;

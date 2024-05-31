@@ -11,7 +11,6 @@
 
 // Function to convert BanDTO to Ban entity
 static Ban *ban_dto_to_entity(const BanDTO *ban_dto) {
-    if (!ban_dto) return NULL;
 
     Ban *ban_entity = (Ban *)malloc(sizeof(Ban));
     if (!ban_entity) return NULL;
@@ -70,21 +69,33 @@ static BanDTO **bans_to_dtos(Ban **bans) {
     return ban_dtos;
 }
 
+static Ban *ban_request_to_entity(const BanRequest *request) {
+    Ban *ban = (Ban *) malloc(sizeof(Ban));
+    if (!ban) return NULL;
+    ban->key.resource_id = request->resource_id;
+    ban->key.user_id = request->user_id;
+    ban->key.resource_type = strdup(request->resource_type);
+    ban->reason = strdup(request->reason);
+    ban->moderator_id = request->moderator_id;
+
+    return ban;
+}
+
 // Function to create a ban
-BanDTO *ban_service_create_ban(const BanDTO *ban_dto) {
-    Ban *ban_entity = ban_dto_to_entity(ban_dto);
+BanDTO *ban_service_create_ban(const BanRequest *ban_request) {
+    Ban *ban_entity = ban_request_to_entity(ban_request);
     if (!ban_entity) return NULL;
 
     long long timestamp = utils_time_in_milliseconds();
     ban_entity->created_at = timestamp;
     ban_entity->updated_at = timestamp;
+    ban_entity->expiration_date = ban_request->duration ? ban_request->duration * 3600000 + timestamp : 0;
 
     Ban *ban = ban_repo_create(ban_entity);
     free_ban(ban_entity);
 
     if (!ban) return NULL;
     BanDTO *created_ban = ban_entity_to_dto(ban);
-    free_ban(ban_entity);
     free_ban(ban);
 
     return created_ban;
@@ -105,15 +116,19 @@ BanDTO *ban_service_get_ban(long long resource_id, long long user_id, const char
 }
 
 // Function to update a ban
-BanDTO *ban_service_update_ban(const BanDTO *ban_dto) {
-    Ban *ban_entity = ban_dto_to_entity(ban_dto);
-    if (!ban_entity) return NULL;
+BanDTO *ban_service_update_ban(const BanRequest *ban_request) {
+    BanDTO *ban_dto = ban_service_get_ban(ban_request->resource_id, ban_request->user_id, ban_request->resource_type);
+    Ban *ban_entity = ban_request_to_entity(ban_request);
+    if (!ban_entity || !ban_dto) return NULL;
 
     long long timestamp = utils_time_in_milliseconds();
+    ban_entity->created_at = ban_dto->created_at;
     ban_entity->updated_at = timestamp;
+    ban_entity->expiration_date = ban_request->duration ? ban_request->duration * 3600000 + timestamp : 0;
 
     Ban *updated_ban = ban_repo_update(ban_entity);
     free_ban(ban_entity);
+    free_ban_dto(ban_dto);
 
     if (!updated_ban) return NULL;
 
@@ -145,7 +160,17 @@ void ban_service_annul_ban(long long resource_id, long user_id, const char *reso
     BanDTO *ban_dto = ban_service_get_ban(resource_id, user_id, resource_type);
     if (!ban_dto) return; // Ban does not exist
     ban_dto->expiration_date = 1;
-    UNUSED_PTR(ban_service_update_ban(ban_dto))
+
+    Ban *ban_entity = ban_dto_to_entity(ban_dto);
+    if (!ban_entity) return;
+
+    long long timestamp = utils_time_in_milliseconds();
+    ban_entity->updated_at = timestamp;
+    ban_entity->expiration_date = 1;
+
+    Ban *updated_ban = ban_repo_update(ban_entity);
+    free_ban(updated_ban);
+    free_ban(ban_entity);
     free_ban_dto(ban_dto);
 }
 

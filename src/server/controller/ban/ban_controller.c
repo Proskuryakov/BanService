@@ -38,9 +38,9 @@ static char *extract_json_body(struct mg_http_message *hm) {
 //}
 
 int ban_controller_handle_get_ban_by_id(struct mg_connection *nc, struct mg_http_message *hm, char **params) {
-    long user_id = atol(params[0]);
+    char *resource_type = params[0];
     long resource_id = atol(params[1]);
-    char *resource_type = params[2];
+    long user_id = atol(params[2]);
 
     BanDTO *ban = ban_service_get_ban(resource_id, user_id, resource_type);
     if (!ban) {
@@ -67,7 +67,7 @@ int ban_controller_handle_create_ban(struct mg_connection *nc, struct mg_http_me
         return 0;
     }
 
-    BanDTO *ban_dto = json_str_to_ban_dto(json_body);
+    BanRequest *ban_dto = json_str_to_ban_request(json_body);
     free(json_body);
     if (!ban_dto) {
         mg_http_reply(nc, 400, "", "Invalid JSON\n");
@@ -75,7 +75,7 @@ int ban_controller_handle_create_ban(struct mg_connection *nc, struct mg_http_me
     }
 
     BanDTO *ban = ban_service_create_ban(ban_dto);
-    free_ban_dto(ban_dto);
+    free_ban_request(ban_dto);
     if (!ban) {
         mg_http_reply(nc, 500, "", "Failed to create ban\n");
         return 0;
@@ -101,15 +101,16 @@ int ban_controller_handle_update_ban(struct mg_connection *nc, struct mg_http_me
         return 0;
     }
 
-    BanDTO *ban_dto = json_str_to_ban_dto(json_body);
+    BanRequest *ban_request = json_str_to_ban_request(json_body);
     free(json_body);
-    if (!ban_dto) {
+
+    if (!ban_request) {
         mg_http_reply(nc, 400, "", "Invalid JSON\n");
         return 0;
     }
 
-    BanDTO *ban = ban_service_update_ban(ban_dto);
-    free_ban_dto(ban_dto);
+    BanDTO *ban = ban_service_update_ban(ban_request);
+    free_ban_request(ban_request);
     if (!ban) {
         mg_http_reply(nc, 500, "", "Failed to update ban\n");
         return 0;
@@ -129,9 +130,9 @@ int ban_controller_handle_update_ban(struct mg_connection *nc, struct mg_http_me
 }
 
 int ban_controller_handle_delete_ban_by_id(struct mg_connection *nc, struct mg_http_message *hm, char **params) {
-    long user_id = atol(params[0]);
+    char *resource_type = params[0];
     long resource_id = atol(params[1]);
-    char *resource_type = params[2];
+    long user_id = atol(params[2]);
 
     ban_service_delete_ban(resource_id, user_id, resource_type);
     mg_http_reply(nc, 202, "", "");
@@ -139,9 +140,9 @@ int ban_controller_handle_delete_ban_by_id(struct mg_connection *nc, struct mg_h
 }
 
 int ban_controller_handle_annul_ban(struct mg_connection *nc, struct mg_http_message *hm, char **params) {
-    long resource_id = atoll(params[0]);
-    long user_id = atol(params[1]);
-    const char *resource_type = params[2];
+    char *resource_type = params[0];
+    long resource_id = atol(params[1]);
+    long user_id = atol(params[2]);
 
     ban_service_annul_ban(resource_id, user_id, resource_type);
     mg_http_reply(nc, 200, "Content-Type: text/plain\r\n", "Ban annulled");

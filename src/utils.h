@@ -20,8 +20,6 @@
     if (item) dest = cJSON_IsTrue(item); \
 } while (0)
 
-#define UNUSED_PTR(ptr) free(ptr);
-
 long long utils_time_in_milliseconds();
 
 #endif //BANSERVICE_UTILS_H

@@ -96,3 +96,10 @@ void free_ban_request_array(BanRequest **requests) {
     }
 }
 
+BanRequest *json_str_to_ban_request(const char *str) {
+    cJSON *json = cJSON_Parse(str);
+    BanRequest *dto = json_to_ban_request(json);
+    cJSON_Delete(json);
+    return dto;
+}
+
