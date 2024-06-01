@@ -20,7 +20,6 @@ typedef struct {
     RequestHandler handler;
 } Route;
 
-#define MAX_ROUTES 100
 
 static Route specific_routes[MAX_ROUTES];
 static Route wildcard_routes[MAX_ROUTES];
