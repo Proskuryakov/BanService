@@ -19,6 +19,7 @@ typedef struct {
     long long updated_at; // Timestamp
     long long expiration_date; // Timestamp
     int is_permanent;
+    int expired;
 } BanDTO;
 
 

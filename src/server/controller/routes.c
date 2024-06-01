@@ -163,10 +163,11 @@ void register_routes() {
     add_route("GET", "/v1/ban/resource/{resource_type}/id/{resource_id}/user/{user_id}", ban_controller_handle_get_ban_by_id);
     add_route("POST", "/v1/ban/", ban_controller_handle_create_ban);
     add_route("PUT", "/v1/ban/", ban_controller_handle_update_ban);
-    add_route("DELETE", "/v1/ban/resource/{resource_type}/id/{resource_id}/user/{user_id}", ban_controller_handle_delete_ban_by_id);
     add_route("GET", "/v1/ban/user/{user_id}/actual", ban_controller_handle_get_actual_bans_by_user_id);
     add_route("GET", "/v1/ban/resource/{resource_type}/id/{resource_id}/actual", ban_controller_handle_get_actual_bans_by_resource);
     add_route("PUT", "/v1/ban/resource/{resource_type}/id/{resource_id}/user/{user_id}/annul", ban_controller_handle_annul_ban);
+    add_route("GET", "/v1/ban/user/{user_id}/history", ban_controller_handle_get_bans_history_by_user);
+    add_route("GET", "/v1/ban/resource/{resource_type}/id/{resource_id}/history", ban_controller_handle_get_bans_history_by_resource);
 
     add_route("GET", "/swagger", swagger_handle_index);
     add_route("GET", "/swagger/*", swagger_handle_static_swagger);

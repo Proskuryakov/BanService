@@ -171,7 +171,7 @@ Ban *ban_repo_find(const BanPK *key) {
 }
 
 Ban **ban_repo_find_all_by_user_id(long user_id) {
-    const char *sql = "SELECT * FROM bans WHERE user_id=$1";
+    const char *sql = "SELECT * FROM bans WHERE user_id=$1 ORDER BY created_at";
     const char *param_values[1] = {NULL};
     param_values[0] = (char *) malloc(32); // Allocate memory for user_id
     sprintf((char *) param_values[0], "%ld", user_id);
@@ -202,7 +202,7 @@ Ban **ban_repo_find_all_by_user_id(long user_id) {
 }
 
 Ban **ban_repo_find_all_by_resource_type_and_id(const char *resource_type, long resource_id) {
-    const char *sql = "SELECT * FROM bans WHERE resource_type=$1 AND resource_id=$2";
+    const char *sql = "SELECT * FROM bans WHERE resource_type=$1 AND resource_id=$2 ORDER BY created_at";
     const char *param_values[2] = {NULL};
     param_values[0] = resource_type;
     param_values[1] = (char *) malloc(32); // Allocate memory for resource_id
@@ -236,7 +236,7 @@ Ban **ban_repo_find_all_by_resource_type_and_id(const char *resource_type, long 
 // Function to find active bans by user id
 Ban **ban_repository_find_active_bans_by_user_id(long long user_id, long long time) {
     PGresult *res = NULL;
-    const char *sql = "SELECT * FROM bans WHERE user_id = $1 AND (expiration_date > $2 OR expiration_date = 0)";
+    const char *sql = "SELECT * FROM bans WHERE user_id = $1 AND (expiration_date > $2 OR expiration_date = 0) ORDER BY created_at";
     char *param_values[2] = {NULL};
     param_values[0] = (char *) malloc(32);
     param_values[1] = (char *) malloc(32);
@@ -294,7 +294,7 @@ Ban **ban_repository_find_active_bans_by_user_id(long long user_id, long long ti
 // Function to find active bans by resource type and id
 Ban **ban_repository_find_active_bans_by_resource_type_and_id(const char *resource_type, long long resource_id, long long time) {
     PGresult *res = NULL;
-    const char *sql = "SELECT * FROM bans WHERE resource_type = $1 AND resource_id = $2 AND (expiration_date > $3 OR expiration_date = 0)";
+    const char *sql = "SELECT * FROM bans WHERE resource_type = $1 AND resource_id = $2 AND (expiration_date > $3 OR expiration_date = 0) ORDER BY created_at";
     char *param_values[3] = {NULL};
     param_values[0] = strdup(resource_type);
     param_values[1] = (char *) malloc(32);

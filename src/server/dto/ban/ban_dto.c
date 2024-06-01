@@ -19,6 +19,7 @@ cJSON *ban_dto_to_json(const BanDTO *ban) {
     cJSON_AddNumberToObject(json, "updated_at", ban->updated_at);
     cJSON_AddNumberToObject(json, "expiration_date", ban->expiration_date);
     cJSON_AddBoolToObject(json, "is_permanent", ban->is_permanent);
+    cJSON_AddBoolToObject(json, "expired", ban->expired);
 
     return json;
 }
@@ -37,6 +38,7 @@ BanDTO *json_to_ban_dto(const cJSON *json) {
     JSON_GET_NUMBER(json, "updated_at", ban->updated_at);
     JSON_GET_NUMBER(json, "expiration_date", ban->expiration_date);
     JSON_GET_BOOL(json, "is_permanent", ban->is_permanent);
+    JSON_GET_BOOL(json, "expired", ban->expired);
 
     return ban;
 }

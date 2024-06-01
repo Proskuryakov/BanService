@@ -100,7 +100,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/BanDTO"
+                "$ref": "#/components/schemas/BanRequest"
               }
             }
           },
@@ -112,7 +112,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Ban"
+                  "$ref": "#/components/schemas/BanDTO"
                 }
               }
             }
@@ -126,7 +126,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/BanDTO"
+                "$ref": "#/components/schemas/BanRequest"
               }
             }
           },
@@ -138,7 +138,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Ban"
+                  "$ref": "#/components/schemas/BanDTO"
                 }
               }
             }
@@ -204,6 +204,78 @@
         "responses": {
           "200": {
             "description": "Actual bans for resource",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/BanDTO"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/ban/user/{user_id}/history": {
+      "get": {
+        "summary": "Get All Bans by User ID",
+        "operationId": "getBansHistoryByUserId",
+        "parameters": [
+          {
+            "name": "user_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "All bans for user",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/BanDTO"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/ban/resource/{resource_type}/id/{resource_id}/history": {
+      "get": {
+        "summary": "Get All Bans by Resource",
+        "operationId": "getBansHistoryByResource",
+        "parameters": [
+          {
+            "name": "resource_type",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "resource_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "All bans for resource",
             "content": {
               "application/json": {
                 "schema": {
@@ -339,6 +411,9 @@
           },
           "is_permanent": {
             "type": "boolean"
+          },
+          "expired": {
+            "type": "boolean"
           }
         },
         "required": [
@@ -348,10 +423,45 @@
           "moderator_id",
           "created_at",
           "updated_at",
-          "expiration_date",
-          "is_permanent"
+          "expiration_date"
+        ]
+      },
+      "BanRequest": {
+        "type": "object",
+        "properties": {
+          "resource_id": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "user_id": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "resource_type": {
+            "type": "string"
+          },
+          "reason": {
+            "type": "string"
+          },
+          "moderator_id": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "duration": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Duration of ban in hours"
+          }
+        },
+        "required": [
+          "resource_id",
+          "user_id",
+          "resource_type",
+          "moderator_id",
+          "duration"
         ]
       }
+
     }
   }
 }

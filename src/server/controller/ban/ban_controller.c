@@ -18,25 +18,6 @@ static char *extract_json_body(struct mg_http_message *hm) {
     return json_body;
 }
 
-//int ban_controller_handle_get_bans(struct mg_connection *nc, struct mg_http_message *hm, char **params) {
-//    BanDTO **bans = ban_service_find();
-//    if (!bans) {
-//        mg_http_reply(nc, 500, "Content-Type: text/plain\r\n", "Error reading bans");
-//        return 0;
-//    }
-//
-//    char *response = bans_to_json_array(bans);
-//    if (!response) {
-//        mg_http_reply(nc, 500, "Content-Type: text/plain\r\n", "Error creating JSON response");
-//        return 0;
-//    }
-//
-//    mg_http_reply(nc, 200, "Content-Type: application/json\r\n", "%s", response);
-//    free(response);
-//    free_ban_array(bans);
-//    return 0;
-//}
-
 int ban_controller_handle_get_ban_by_id(struct mg_connection *nc, struct mg_http_message *hm, char **params) {
     char *resource_type = params[0];
     long resource_id = atol(params[1]);
@@ -77,13 +58,13 @@ int ban_controller_handle_create_ban(struct mg_connection *nc, struct mg_http_me
     BanDTO *ban = ban_service_create_ban(ban_dto);
     free_ban_request(ban_dto);
     if (!ban) {
-        mg_http_reply(nc, 500, "", "Failed to create ban\n");
+        mg_http_reply(nc, 400, "", "Failed to create ban\n");
         return 0;
     }
 
     char *response_json = ban_dto_to_json_str(ban);
     if (!response_json) {
-        mg_http_reply(nc, 500, "", "Failed to serialize ban\n");
+        mg_http_reply(nc, 400   , "", "Failed to serialize ban\n");
         free_ban_dto(ban);
         return 0;
     }
@@ -126,16 +107,6 @@ int ban_controller_handle_update_ban(struct mg_connection *nc, struct mg_http_me
     mg_http_reply(nc, 200, "Content-Type: application/json\r\n", "%s", response_json);
     free(response_json);
     free_ban_dto(ban);
-    return 0;
-}
-
-int ban_controller_handle_delete_ban_by_id(struct mg_connection *nc, struct mg_http_message *hm, char **params) {
-    char *resource_type = params[0];
-    long resource_id = atol(params[1]);
-    long user_id = atol(params[2]);
-
-    ban_service_delete_ban(resource_id, user_id, resource_type);
-    mg_http_reply(nc, 202, "", "");
     return 0;
 }
 
@@ -190,6 +161,49 @@ int ban_controller_handle_get_actual_bans_by_resource(struct mg_connection *nc, 
     return 0;
 }
 
+int ban_controller_handle_get_bans_history_by_resource(struct mg_connection *nc, struct mg_http_message *hm,
+                                                       char **params) {
+    const char *resource_type = params[0];
+    long resource_id = atoll(params[1]);
+    BanDTO **bans = ban_service_find_all_bans_by_resource_type_and_id(resource_type, resource_id);
+    if (!bans) {
+        mg_http_reply(nc, 500, "Content-Type: text/plain\r\n", "Error reading bans");
+        return 0;
+    }
+
+    char *response = ban_dto_array_to_json_str(bans);
+    if (!response) {
+        mg_http_reply(nc, 500, "Content-Type: text/plain\r\n", "Error creating JSON response");
+        return 0;
+    }
+
+    mg_http_reply(nc, 200, "Content-Type: application/json\r\n", "%s", response);
+    free(response);
+    free_ban_dto_array(bans);
+    return 0;
+}
+
+int ban_controller_handle_get_bans_history_by_user(struct mg_connection *nc, struct mg_http_message *hm, char **params) {
+    long user_id = atol(params[0]);
+    BanDTO **bans = ban_service_find_all_bans_by_user_id(user_id);
+    if (!bans) {
+        mg_http_reply(nc, 500, "Content-Type: text/plain\r\n", "Error reading bans");
+        return 0;
+    }
+
+    char *response = ban_dto_array_to_json_str(bans);
+    if (!response) {
+        mg_http_reply(nc, 500, "Content-Type: text/plain\r\n", "Error creating JSON response");
+        return 0;
+    }
+
+    mg_http_reply(nc, 200, "Content-Type: application/json\r\n", "%s", response);
+    free(response);
+    free_ban_dto_array(bans);
+    return 0;
+}
+
+
 void ban_controller_start() {
     ban_service_start();
 }
@@ -197,4 +211,3 @@ void ban_controller_start() {
 void ban_controller_stop() {
     ban_service_stop();
 }
-

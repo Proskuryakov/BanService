@@ -34,6 +34,7 @@ static BanDTO *ban_entity_to_dto(const Ban *ban_entity) {
     BanDTO *ban_dto = (BanDTO *)malloc(sizeof(BanDTO));
     if (!ban_dto) return NULL;
 
+    long long timestamp = utils_time_in_milliseconds();
     ban_dto->resource_id = ban_entity->key.resource_id;
     ban_dto->user_id = ban_entity->key.user_id;
     ban_dto->resource_type = strdup(ban_entity->key.resource_type);
@@ -43,6 +44,7 @@ static BanDTO *ban_entity_to_dto(const Ban *ban_entity) {
     ban_dto->updated_at = ban_entity->updated_at;
     ban_dto->expiration_date = ban_entity->expiration_date;
     ban_dto->is_permanent = ban_entity->expiration_date ? 0 : 1;
+    ban_dto->expired = (timestamp > ban_entity->expiration_date) && !ban_dto->is_permanent;
 
     return ban_dto;
 }
@@ -83,6 +85,16 @@ static Ban *ban_request_to_entity(const BanRequest *request) {
 
 // Function to create a ban
 BanDTO *ban_service_create_ban(const BanRequest *ban_request) {
+
+    BanPK pk = {.resource_type = ban_request->resource_type, .resource_id = ban_request->resource_id, .user_id = ban_request->user_id};
+    Ban *existing_ban = ban_repo_find(&pk);
+
+    if (existing_ban) {
+        free_ban(existing_ban);
+        return NULL;
+    }
+
+
     Ban *ban_entity = ban_request_to_entity(ban_request);
     if (!ban_entity) return NULL;
 
