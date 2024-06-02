@@ -1,0 +1,127 @@
+@startuml
+class BanService {
+    +void ban_service_start()
+    +void ban_service_stop()
+    +BanDTO *ban_service_create_ban(const BanRequest *ban_request)
+    +BanDTO *ban_service_get_ban(long long resource_id, long long user_id, const char *resource_type)
+    +BanDTO *ban_service_update_ban(const BanRequest *ban_request)
+    +void ban_service_delete_ban(long long resource_id, long long user_id, const char *resource_type)
+    +BanDTO **ban_service_find_all_bans_by_user_id(long long user_id)
+    +BanDTO **ban_service_find_all_bans_by_resource_type_and_id(const char *resource_type, long long resource_id)
+    +void ban_service_annul_ban(long long resource_id, long user_id, const char *resource_type)
+    +BanDTO **ban_service_find_all_actual_bans_for_user_id(long long user_id)
+    +BanDTO **ban_service_find_all_actual_bans_for_resource(const char *resource_type, long long resource_id)
+}
+
+class BanRepository {
+    +int ban_repo_init(const char *conninfo)
+    +void ban_repo_close()
+    +Ban* ban_repo_create(const Ban *ban)
+    +Ban* ban_repo_update(const Ban *ban)
+    +int ban_repo_delete(const BanPK *key)
+    +Ban* ban_repo_find(const BanPK *key)
+    +Ban** ban_repo_find_all_by_user_id(long user_id)
+    +Ban** ban_repo_find_all_by_resource_type_and_id(const char *resource_type, long resource_id)
+    +Ban **ban_repository_find_active_bans_by_user_id(long long user_id, long long time)
+    +Ban **ban_repository_find_active_bans_by_resource_type_and_id(const char *resource_type, long long resource_id, long long time)
+}
+
+class BanRequest {
+    +long resource_id
+    +long user_id
+    +char *resource_type
+    +char *reason
+    +long moderator_id
+    +long long duration
+    +cJSON *ban_request_to_json(const BanRequest *request)
+    +BanRequest *json_to_ban_request(const cJSON *json)
+    +BanRequest *json_str_to_ban_request(const char *str)
+    +cJSON *ban_request_array_to_json(BanRequest **requests)
+    +BanRequest **json_to_ban_request_array(const cJSON *json)
+    +void free_ban_request(BanRequest *request)
+    +void free_ban_request_array(BanRequest **requests)
+}
+
+class BanDTO {
+    +long resource_id
+    +long user_id
+    +char *resource_type
+    +char *reason
+    +long moderator_id
+    +long long created_at
+    +long long updated_at
+    +long long expiration_date
+    +int is_permanent
+    +int expired
+    +cJSON *ban_dto_to_json(const BanDTO *ban)
+    +char *ban_dto_to_json_str(const BanDTO *ban)
+    +BanDTO *json_to_ban_dto(const cJSON *json)
+    +BanDTO *json_str_to_ban_dto(const char *str)
+    +cJSON *ban_dto_array_to_json(BanDTO **bans)
+    +char *ban_dto_array_to_json_str(BanDTO **bans)
+    +BanDTO **json_to_ban_dto_array(const cJSON *json)
+    +BanDTO **json_tr_to_ban_dto_array(const char *str)
+    +void free_ban_dto(BanDTO *ban)
+    +void free_ban_dto_array(BanDTO **bans)
+}
+
+class Ban {
+    +BanPK key
+    +char *reason
+    +long moderator_id
+    +long long created_at
+    +long long updated_at
+    +long long expiration_date
+    +void free_ban(Ban *ban)
+    +void free_ban_array(Ban **bans)
+}
+
+class BanPK {
+    +long resource_id
+    +long user_id
+    +char *resource_type
+}
+
+class PostgresDatabase {
+    +PGconn* db_open(const char *conninfo)
+    +void db_close(PGconn *conn)
+    +int db_execute(PGconn *conn, const char *sql)
+    +int db_execute_param(PGconn *conn, const char *sql, int param_count, const char **param_values)
+    +PGresult* db_query(PGconn *conn, const char *sql)
+    +PGresult* db_query_param(PGconn *conn, const char *sql, int param_count, const char **param_values)
+    +void db_free_query_result(PGresult *res)
+}
+
+class Routes {
+    +void add_route(const char *method, const char *pattern, RequestHandler handler)
+    +void route_handler(struct mg_connection *nc, int ev, void *ev_data)
+    +void enable_controllers()
+    +void free_controllers()
+    +void register_routes()
+}
+
+class SwaggerController {
+    +int swagger_handle_index(struct mg_connection *nc, struct mg_http_message *hm, char **params)
+    +int swagger_handle_static_swagger(struct mg_connection *nc, struct mg_http_message *hm, char **params)
+    +int swagger_handle_api(struct mg_connection *nc, struct mg_http_message *hm, char **params)
+    +int swagger_handle_static(struct mg_connection *nc, struct mg_http_message *hm, char **params)
+}
+
+class BanController {
+    +int ban_controller_handle_get_ban_by_id(struct mg_connection *nc, struct mg_http_message *hm, char **params)
+    +int ban_controller_handle_create_ban(struct mg_connection *nc, struct mg_http_message *hm, char **params)
+    +int ban_controller_handle_update_ban(struct mg_connection *nc, struct mg_http_message *hm, char **params)
+    +int ban_controller_handle_annul_ban(struct mg_connection *nc, struct mg_http_message *hm, char **params)
+    +int ban_controller_handle_get_actual_bans_by_user_id(struct mg_connection *nc, struct mg_http_message *hm, char **params)
+    +int ban_controller_handle_get_actual_bans_by_resource(struct mg_connection *nc, struct mg_http_message *hm, char **params)
+    +int ban_controller_handle_get_bans_history_by_resource(struct mg_connection *nc, struct mg_http_message *hm, char **params)
+    +int ban_controller_handle_get_bans_history_by_user(struct mg_connection *nc, struct mg_http_message *hm, char **params)
+    +void ban_controller_start()
+    +void ban_controller_stop()
+}
+
+BanService --> BanDTO
+BanService --> BanRequest
+BanRepository --> Ban
+BanRepository --> BanPK
+@enduml
